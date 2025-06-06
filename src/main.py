@@ -1,5 +1,5 @@
-from data_collector import InstagramDataCollector
-from database import DatabaseHandler
+from src.data_collector import InstagramDataCollector
+from src.database import DatabaseHandler
 import re
 
 def extract_username(url):

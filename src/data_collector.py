@@ -2,6 +2,7 @@ from apify_client import ApifyClient
 import pandas as pd
 from datetime import datetime
 from config.config import APIFY_API_TOKEN, APIFY_ACTOR_ID
+import requests
 
 class InstagramDataCollector:
     def __init__(self):
@@ -25,15 +26,7 @@ class InstagramDataCollector:
             print(f"Starting Apify task {self.task_id}...")
             
             # Run the task
-            run = self.client.task(self.task_id).call(
-                run_input={
-                    "directUrls": [instagram_profile_url],
-                    "resultsType": "reels",
-                    "maxItems": 100,
-                    "addParentData": True,  # Get profile information
-                    "maxRequestRetries": 3
-                }
-            )
+            run = self.client.task(self.task_id).call()
             
             print("Fetching dataset...")
             # Get the dataset
@@ -42,12 +35,20 @@ class InstagramDataCollector:
             print("Processing data...")
             # Get the items
             items = list(dataset.iterate_items())
+    
             
             if not items:
                 raise ValueError("No data was collected from Instagram")
             
             # Convert to DataFrame
             df = pd.DataFrame(items)
+            
+            # Rename columns to match expected names
+            df.rename(columns={
+                'likesCount': 'likes',
+                'videoViewCount': 'views',
+                'commentsCount': 'comments'
+            }, inplace=True)
             
             # Ensure required columns exist
             required_columns = ['likes', 'views', 'comments']
@@ -97,3 +98,16 @@ class InstagramDataCollector:
         except Exception as e:
             print(f"Error calculating metrics: {str(e)}")
             raise 
+
+    def save_metrics(self, influencer_id, metrics):
+        data = {
+            'influencer_id': influencer_id,
+            **metrics
+        }
+        response = requests.post(
+            f"{SUPABASE_URL}/rest/v1/{METRICS_TABLE}",
+            headers=headers,
+            json=data
+        )
+        response.raise_for_status()
+        return response.json() 

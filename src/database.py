@@ -1,9 +1,16 @@
-from supabase import create_client
+import requests
 from config.config import SUPABASE_URL, SUPABASE_KEY, INFLUENCER_TABLE, METRICS_TABLE
+
+headers = {
+    "apikey": SUPABASE_KEY,
+    "Authorization": f"Bearer {SUPABASE_KEY}",
+    "Content-Type": "application/json",
+    "Prefer": "return=representation"
+}
 
 class DatabaseHandler:
     def __init__(self):
-        self.supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
+        pass  # No supabase client needed
 
     def create_influencer(self, instagram_url, username):
         """
@@ -14,9 +21,16 @@ class DatabaseHandler:
             'username': username,
             'created_at': 'now()'
         }
-        
-        result = self.supabase.table(INFLUENCER_TABLE).insert(data).execute()
-        return result.data[0]['id']
+        response = requests.post(
+            f"{SUPABASE_URL}/rest/v1/{INFLUENCER_TABLE}",
+            headers=headers,
+            json=data
+        )
+        print("Status code:", response.status_code)
+        print("Response text:", response.text)
+        response.raise_for_status()
+        # Supabase returns a list of inserted rows
+        return response.json()[0]['id']
 
     def save_metrics(self, influencer_id, metrics):
         """
@@ -26,17 +40,31 @@ class DatabaseHandler:
             'influencer_id': influencer_id,
             **metrics
         }
-        
-        result = self.supabase.table(METRICS_TABLE).insert(data).execute()
-        return result.data
+        response = requests.post(
+            f"{SUPABASE_URL}/rest/v1/{METRICS_TABLE}",
+            headers=headers,
+            json=data
+        )
+        print("Status code:", response.status_code, flush=True)
+        print("Response text:", response.text, flush=True)
+        response.raise_for_status()
+        print("Status code:", response.status_code, flush=True)
+        print("Response text:", response.text, flush=True)
+        return response.json()
 
     def get_influencer_by_url(self, instagram_url):
         """
         Get influencer by Instagram URL
         """
-        result = self.supabase.table(INFLUENCER_TABLE)\
-            .select('*')\
-            .eq('instagram_url', instagram_url)\
-            .execute()
-        
-        return result.data[0] if result.data else None 
+        params = {
+            'instagram_url': f"eq.{instagram_url}",
+            'select': '*'
+        }
+        response = requests.get(
+            f"{SUPABASE_URL}/rest/v1/{INFLUENCER_TABLE}",
+            headers=headers,
+            params=params
+        )
+        response.raise_for_status()
+        data = response.json()
+        return data[0] if data else None 
