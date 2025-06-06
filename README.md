@@ -32,7 +32,7 @@ InfluenceIQ is an automated tool for collecting, analyzing, and storing Instagra
 
 ### 1. Clone the repository
 ```sh
-git clone https://github.com/yourusername/influenceiq-api.git
+git clone https://github.com/MehdiTC/influenceiq-api.git
 cd influenceiq-api
 ```
 
@@ -146,9 +146,9 @@ scraped_at: 2024-06-06T12:34:56
 ---
 
 ## Contact
-- **Author:** MehdiTC
+- **Author:** Mehdi Touhami Chahdi
 - **GitHub:** [MehdiTC/influenceiq-api](https://github.com/MehdiTC/influenceiq-api)
-- **Email:** your.email@example.com
+- **Email:** mehdi.touhamic@gmail.com
 
 ---
 
