@@ -5,4 +5,4 @@
    *.pyd
    .DS_Store
    .env
-   
+   .env
